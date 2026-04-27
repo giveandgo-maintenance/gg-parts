@@ -1,915 +1,1791 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,
-          initial-scale=1.0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style"
-          content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Parts Request">
-    <meta name="theme-color" content="#1a56db">
-    <title>Give and Go - Parts Request</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;
-          -webkit-tap-highlight-color:transparent;}
-        html{-webkit-text-size-adjust:100%;}
-        body{font-family:-apple-system,BlinkMacSystemFont,
-             'Segoe UI',Roboto,Arial,sans-serif;
-             background:#f0f4f8;color:#1f2937;min-height:100vh;
-             padding-bottom:max(40px,env(safe-area-inset-bottom));
-             -webkit-overflow-scrolling:touch;
-             overscroll-behavior:none;}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Parts Request">
+  <meta name="theme-color" content="#1a56db">
+  <title>Maintenance Parts Order Request - Give and Go Prepared Foods</title>
+  <style>
+    /* ============================================================
+       RESET
+    ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        .offline-overlay{display:none;position:fixed;
-          top:0;left:0;width:100%;height:100%;
-          background:rgba(0,0,0,0.93);z-index:9999;
-          flex-direction:column;align-items:center;
-          justify-content:center;padding:30px;text-align:center;}
-        .offline-overlay.show{display:flex;}
-        .offline-icon{font-size:72px;margin-bottom:20px;
-          animation:pulse 2s infinite;}
-        @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}
-          50%{transform:scale(1.05);opacity:0.8;}}
-        .offline-title{font-size:24px;font-weight:700;
-          color:white;margin-bottom:12px;}
-        .offline-message{font-size:15px;color:#d1d5db;
-          line-height:1.7;max-width:300px;margin-bottom:28px;}
-        .offline-dot{width:12px;height:12px;border-radius:50%;
-          background:#ef4444;display:inline-block;margin-right:6px;
-          animation:blink 1.5s infinite;}
-        @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
-        .offline-retry-btn{background:#1a56db;color:white;
-          border:none;padding:14px 32px;border-radius:10px;
-          font-size:16px;font-weight:600;cursor:pointer;
-          font-family:inherit;}
+    html {
+      -webkit-text-size-adjust: 100%;
+      overscroll-behavior: none;
+    }
 
-        .header{background:linear-gradient(135deg,#1a56db,#1e429f);
-          padding:max(20px,env(safe-area-inset-top)) 16px 20px;
-          text-align:center;position:sticky;top:0;z-index:100;
-          box-shadow:0 2px 12px rgba(0,0,0,0.2);}
-        .header-logo{font-size:26px;margin-bottom:4px;}
-        .header h1{color:white;font-size:17px;font-weight:700;
-          letter-spacing:0.3px;line-height:1.3;}
-        .header p{color:#bfdbfe;font-size:12px;margin-top:4px;}
-        .online-indicator{display:inline-flex;align-items:center;
-          background:rgba(255,255,255,0.15);border-radius:20px;
-          padding:4px 10px;margin-top:8px;font-size:11px;color:white;}
-        .status-dot{width:8px;height:8px;border-radius:50%;
-          background:#10b981;margin-right:5px;flex-shrink:0;}
-        .status-dot.offline{background:#ef4444;}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1f2937;
+      min-height: 100vh;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: none;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: calc(env(safe-area-inset-bottom) + 40px);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
 
-        .container{max-width:600px;margin:20px auto;padding:0 16px;}
-        .card{background:white;border-radius:14px;padding:20px;
-          margin-bottom:14px;
-          box-shadow:0 1px 4px rgba(0,0,0,0.07),
-                     0 4px 12px rgba(0,0,0,0.04);}
-        .card-title{font-size:12px;font-weight:700;color:#1a56db;
-          text-transform:uppercase;letter-spacing:1.2px;
-          margin-bottom:16px;padding-bottom:10px;
-          border-bottom:2px solid #f3f4f6;}
-        .field{margin-bottom:18px;}
-        .field:last-child{margin-bottom:0;}
-        label{display:block;font-size:13px;font-weight:600;
-          color:#374151;margin-bottom:7px;}
-        .required-star{color:#ef4444;margin-left:2px;}
+    /* ============================================================
+       HEADER
+    ============================================================ */
+    .header {
+      background: linear-gradient(135deg, #1a56db 0%, #1e429f 100%);
+      color: #ffffff;
+      padding: 20px 16px 16px;
+      text-align: center;
+      position: relative;
+    }
 
-        input[type="text"],input[type="number"],
-        select,textarea{width:100%;padding:13px 14px;
-          border:2px solid #e5e7eb;border-radius:10px;
-          font-size:16px;font-family:inherit;color:#1f2937;
-          background:#f9fafb;
-          transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;
-          -webkit-appearance:none;appearance:none;outline:none;}
-        input[type="text"]:focus,input[type="number"]:focus,
-        select:focus,textarea:focus{border-color:#1a56db;
-          background:white;
-          box-shadow:0 0 0 3px rgba(26,86,219,0.1);}
-        input.error,select.error,textarea.error{
-          border-color:#ef4444;background:#fef2f2;}
-        .error-msg{display:none;color:#ef4444;font-size:12px;
-          font-weight:500;margin-top:5px;}
-        .error-msg.show{display:block;}
-        .select-wrapper{position:relative;}
-        .select-wrapper::after{content:'';position:absolute;
-          right:14px;top:50%;transform:translateY(-50%);
-          width:0;height:0;border-left:5px solid transparent;
-          border-right:5px solid transparent;
-          border-top:6px solid #6b7280;pointer-events:none;}
-        .select-wrapper select{padding-right:36px;}
-        textarea{resize:none;min-height:100px;line-height:1.5;}
-        .hint{font-size:11px;color:#9ca3af;margin-top:5px;
-          line-height:1.4;}
+    .header-company {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      opacity: 0.85;
+      margin-bottom: 6px;
+    }
 
-        .shift-group{display:grid;
-          grid-template-columns:repeat(3,1fr);gap:8px;}
-        .shift-btn input[type="radio"]{position:absolute;
-          opacity:0;width:0;height:0;pointer-events:none;}
-        .shift-btn label{display:flex;flex-direction:column;
-          align-items:center;justify-content:center;
-          padding:12px 8px;border:2px solid #e5e7eb;
-          border-radius:10px;cursor:pointer;background:#f9fafb;
-          font-weight:600;font-size:12px;color:#6b7280;
-          text-align:center;transition:all 0.2s;gap:4px;
-          user-select:none;-webkit-user-select:none;}
-        .shift-emoji{font-size:20px;}
-        .shift-btn input:checked+label{background:#1a56db;
-          border-color:#1a56db;color:white;font-weight:700;
-          box-shadow:0 2px 8px rgba(26,86,219,0.3);}
+    .header-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
 
-        .priority-group{display:flex;flex-direction:column;gap:10px;}
-        .priority-btn{position:relative;}
-        .priority-btn input[type="radio"]{position:absolute;
-          opacity:0;width:0;height:0;pointer-events:none;}
-        .priority-btn label{display:flex;align-items:flex-start;
-          padding:13px 14px;border:2px solid #e5e7eb;
-          border-radius:10px;cursor:pointer;background:#f9fafb;
-          transition:all 0.2s;gap:12px;user-select:none;
-          -webkit-user-select:none;margin-bottom:0;}
-        .priority-emoji{font-size:22px;flex-shrink:0;margin-top:1px;}
-        .priority-text strong{display:block;font-size:14px;
-          font-weight:700;color:#1f2937;margin-bottom:3px;}
-        .priority-text span{font-size:11px;color:#6b7280;
-          line-height:1.4;font-weight:400;}
-        .priority-btn input:checked+label.p-rush{
-          border-color:#ef4444;background:#fef2f2;}
-        .priority-btn input:checked+label.p-rush
-          .priority-text strong{color:#dc2626;}
-        .priority-btn input:checked+label.p-high{
-          border-color:#f59e0b;background:#fffbeb;}
-        .priority-btn input:checked+label.p-high
-          .priority-text strong{color:#d97706;}
-        .priority-btn input:checked+label.p-medium{
-          border-color:#10b981;background:#ecfdf5;}
-        .priority-btn input:checked+label.p-medium
-          .priority-text strong{color:#059669;}
-        .priority-btn input:checked+label.p-low{
-          border-color:#6b7280;background:#f9fafb;}
-        .priority-btn input:checked+label.p-low
-          .priority-text strong{color:#4b5563;}
+    .connection-indicator {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0.9;
+    }
 
-        .photo-grid{display:grid;grid-template-columns:1fr;gap:12px;}
-        @media(min-width:600px){
-          .photo-grid{grid-template-columns:repeat(3,1fr);}}
-        .photo-label-row{display:flex;justify-content:space-between;
-          align-items:center;margin-bottom:7px;}
-        .photo-badge{font-size:10px;font-weight:700;padding:2px 8px;
-          border-radius:20px;letter-spacing:0.5px;}
-        .photo-badge.required{background:#fee2e2;color:#dc2626;}
-        .photo-badge.optional{background:#f3f4f6;color:#6b7280;}
-        .photo-drop-zone{border:2px dashed #d1d5db;border-radius:12px;
-          background:#f9fafb;cursor:pointer;transition:all 0.2s;
-          overflow:hidden;position:relative;}
-        .photo-drop-zone.has-photo{border-color:#10b981;
-          border-style:solid;background:white;}
-        .photo-drop-zone.error-border{border-color:#ef4444;
-          background:#fef2f2;}
-        .photo-drop-inner{padding:20px;text-align:center;}
-        .photo-drop-zone.has-photo .photo-drop-inner{padding:0;}
-        .photo-drop-zone input[type="file"]{position:absolute;
-          top:0;left:0;width:100%;height:100%;opacity:0;
-          cursor:pointer;font-size:16px;-webkit-appearance:none;}
-        .photo-placeholder-icon{font-size:30px;margin-bottom:6px;}
-        .photo-placeholder-text{font-size:13px;color:#9ca3af;
-          font-weight:500;}
-        .photo-placeholder-sub{font-size:11px;color:#d1d5db;
-          margin-top:3px;}
-        .photo-preview-img{width:100%;max-height:180px;
-          object-fit:cover;display:none;border-radius:10px;}
-        .photo-preview-bar{display:none;align-items:center;
-          justify-content:space-between;padding:8px 12px;
-          background:#ecfdf5;}
-        .photo-preview-bar.show{display:flex;}
-        .photo-attached-text{font-size:12px;color:#059669;
-          font-weight:600;}
-        .photo-remove-btn{background:#fee2e2;color:#ef4444;
-          border:none;font-size:12px;font-weight:600;cursor:pointer;
-          padding:4px 8px;border-radius:6px;font-family:inherit;}
+    .conn-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      display: inline-block;
+    }
 
-        .submit-wrapper{margin-top:6px;margin-bottom:20px;}
-        .submit-btn{width:100%;padding:17px;
-          background:linear-gradient(135deg,#1a56db,#1e429f);
-          color:white;border:none;border-radius:14px;font-size:17px;
-          font-weight:700;cursor:pointer;letter-spacing:0.3px;
-          transition:all 0.2s;
-          box-shadow:0 4px 15px rgba(26,86,219,0.35);
-          display:flex;align-items:center;justify-content:center;
-          gap:8px;font-family:inherit;-webkit-appearance:none;
-          min-height:56px;}
-        .submit-btn:active{transform:scale(0.98);
-          box-shadow:0 2px 8px rgba(26,86,219,0.2);}
-        .submit-btn:disabled{background:#9ca3af;box-shadow:none;
-          cursor:not-allowed;transform:none;}
-        .spinner{display:none;width:22px;height:22px;
-          border:3px solid rgba(255,255,255,0.3);
-          border-top-color:white;border-radius:50%;
-          animation:spin 0.8s linear infinite;flex-shrink:0;}
-        @keyframes spin{to{transform:rotate(360deg);}}
-        .spinner.show{display:block;}
-        .submit-text.hide{display:none;}
+    .conn-dot.offline {
+      background: #ef4444;
+    }
 
-        .success-screen{display:none;position:fixed;inset:0;
-          background:white;z-index:1000;flex-direction:column;
-          align-items:center;justify-content:center;
-          padding:40px 28px;text-align:center;
-          padding-top:max(40px,env(safe-area-inset-top));
-          padding-bottom:max(40px,env(safe-area-inset-bottom));}
-        .success-screen.show{display:flex;}
-        .success-animation{width:90px;height:90px;
-          background:#ecfdf5;border-radius:50%;display:flex;
-          align-items:center;justify-content:center;font-size:46px;
-          margin-bottom:22px;
-          animation:popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);}
-        @keyframes popIn{0%{transform:scale(0);opacity:0;}
-          100%{transform:scale(1);opacity:1;}}
-        .success-title{font-size:26px;font-weight:800;
-          color:#059669;margin-bottom:8px;}
-        .success-subtitle{font-size:14px;color:#6b7280;
-          margin-bottom:20px;}
-        .success-id-box{background:#eff6ff;
-          border:2px solid #bfdbfe;border-radius:12px;
-          padding:14px 28px;margin-bottom:20px;}
-        .success-id-label{font-size:11px;color:#6b7280;
-          font-weight:600;text-transform:uppercase;
-          letter-spacing:1px;margin-bottom:4px;}
-        .success-id-value{font-size:26px;font-weight:800;
-          color:#1a56db;letter-spacing:1px;}
-        .success-details{background:#f9fafb;border-radius:10px;
-          padding:14px 18px;text-align:left;width:100%;
-          max-width:340px;margin-bottom:24px;}
-        .success-detail-row{display:flex;
-          justify-content:space-between;font-size:13px;
-          padding:5px 0;border-bottom:1px solid #f3f4f6;}
-        .success-detail-row:last-child{border-bottom:none;}
-        .success-detail-label{color:#6b7280;font-weight:500;}
-        .success-detail-value{color:#1f2937;font-weight:600;
-          text-align:right;max-width:55%;}
-        .success-rush-note{background:#fef2f2;
-          border:1px solid #fecaca;border-radius:10px;
-          padding:12px 16px;font-size:13px;color:#dc2626;
-          font-weight:600;margin-bottom:20px;
-          max-width:340px;display:none;}
-        .success-rush-note.show{display:block;}
-        .new-request-btn{background:#1a56db;color:white;
-          border:none;padding:15px 36px;border-radius:12px;
-          font-size:16px;font-weight:700;cursor:pointer;
-          font-family:inherit;
-          box-shadow:0 4px 12px rgba(26,86,219,0.3);}
+    .conn-label {
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
 
-        .toast{display:none;position:fixed;
-          bottom:max(24px,env(safe-area-inset-bottom));
-          left:50%;transform:translateX(-50%);
-          background:#1f2937;color:white;padding:13px 22px;
-          border-radius:10px;font-size:14px;font-weight:500;
-          z-index:9998;max-width:320px;text-align:center;
-          box-shadow:0 4px 16px rgba(0,0,0,0.25);
-          animation:slideUp 0.3s ease;}
-        .toast.show{display:block;}
-        .toast.error{background:#dc2626;}
-        .toast.success{background:#059669;}
-        @keyframes slideUp{
-          from{transform:translateX(-50%) translateY(20px);opacity:0;}
-          to{transform:translateX(-50%) translateY(0);opacity:1;}}
+    /* ============================================================
+       OFFLINE OVERLAY
+    ============================================================ */
+    .offline-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      text-align: center;
+    }
 
-        @media(max-width:360px){
-          .header h1{font-size:15px;}
-          .shift-group{gap:6px;}
-          .submit-btn{font-size:15px;}}
-    </style>
+    .offline-overlay.show {
+      display: flex;
+    }
+
+    .offline-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #ef4444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .offline-icon-x {
+      width: 28px;
+      height: 28px;
+      position: relative;
+    }
+
+    .offline-icon-x::before,
+    .offline-icon-x::after {
+      content: '';
+      position: absolute;
+      width: 28px;
+      height: 3px;
+      background: #ffffff;
+      top: 50%;
+      left: 0;
+      border-radius: 2px;
+    }
+
+    .offline-icon-x::before { transform: translateY(-50%) rotate(45deg); }
+    .offline-icon-x::after  { transform: translateY(-50%) rotate(-45deg); }
+
+    .offline-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .offline-msg {
+      font-size: 15px;
+      color: #d1d5db;
+      line-height: 1.6;
+    }
+
+    /* ============================================================
+       FORM WRAPPER
+    ============================================================ */
+    .form-wrapper {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* ============================================================
+       CARD
+    ============================================================ */
+    .card {
+      background: #ffffff;
+      border-radius: 14px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 2px 12px rgba(0, 0, 0, 0.06);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 12px 18px;
+      border-bottom: 1px solid #f0f4f8;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #1a56db;
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    /* ============================================================
+       FIELD
+    ============================================================ */
+    .field {
+      margin-bottom: 18px;
+    }
+
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 7px;
+    }
+
+    .field-label .req {
+      color: #ef4444;
+      margin-left: 3px;
+      font-weight: 700;
+    }
+
+    .field-hint {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+
+    .field-error {
+      font-size: 12px;
+      color: #ef4444;
+      font-weight: 600;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .field.has-error .field-error {
+      display: block;
+    }
+
+    /* ============================================================
+       INPUTS
+    ============================================================ */
+    .input,
+    select.input {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 16px;
+      font-family: inherit;
+      color: #1f2937;
+      background: #f9fafb;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+    }
+
+    select.input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    .input:focus,
+    select.input:focus {
+      border-color: #1a56db;
+      box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.12);
+      background: #ffffff;
+    }
+
+    textarea.input {
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.5;
+    }
+
+    .field.has-error .input,
+    .field.has-error select.input {
+      border-color: #ef4444;
+      background: #fff5f5;
+    }
+
+    /* ============================================================
+       SHIFT RADIO - 3 equal buttons in a row
+    ============================================================ */
+    .shift-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .shift-btn {
+      position: relative;
+    }
+
+    .shift-btn input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .shift-btn label {
+      display: block;
+      text-align: center;
+      padding: 13px 6px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #6b7280;
+      background: #f9fafb;
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .shift-btn input[type="radio"]:checked + label {
+      border-color: #1a56db;
+      background: #1a56db;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(26, 86, 219, 0.3);
+    }
+
+    .field.has-error .shift-btn label {
+      border-color: #ef4444;
+    }
+
+    /* ============================================================
+       PRIORITY CARDS
+    ============================================================ */
+    .priority-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .priority-card {
+      position: relative;
+    }
+
+    .priority-card input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .priority-card label {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      background: #f9fafb;
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .priority-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .priority-dot.red    { background: #ef4444; }
+    .priority-dot.orange { background: #f59e0b; }
+    .priority-dot.yellow { background: #eab308; }
+    .priority-dot.blue   { background: #3b82f6; }
+
+    .priority-text {
+      flex: 1;
+    }
+
+    .priority-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 3px;
+      line-height: 1.3;
+    }
+
+    .priority-desc {
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.4;
+    }
+
+    /* Rush selected */
+    .priority-card.p-rush input[type="radio"]:checked + label {
+      border-color: #ef4444;
+      background: #fff5f5;
+    }
+
+    /* High selected */
+    .priority-card.p-high input[type="radio"]:checked + label {
+      border-color: #f59e0b;
+      background: #fffbeb;
+    }
+
+    /* Medium selected */
+    .priority-card.p-medium input[type="radio"]:checked + label {
+      border-color: #22c55e;
+      background: #f0fdf4;
+    }
+
+    /* Low selected */
+    .priority-card.p-low input[type="radio"]:checked + label {
+      border-color: #9ca3af;
+      background: #f9fafb;
+    }
+
+    .field.has-error .priority-card label {
+      border-color: #ef4444;
+    }
+
+    /* ============================================================
+       PHOTO SECTION
+    ============================================================ */
+    .photo-hint {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.5;
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      background: #f0f4f8;
+      border-radius: 8px;
+    }
+
+    .photo-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    @media (min-width: 600px) {
+      .photo-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+      }
+    }
+
+    .photo-item {}
+
+    .photo-item-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+    }
+
+    .photo-item-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .badge-required {
+      background: #fee2e2;
+      color: #ef4444;
+    }
+
+    .badge-optional {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+    .photo-upload-area {
+      border: 2px dashed #d1d5db;
+      border-radius: 10px;
+      padding: 20px 12px;
+      text-align: center;
+      cursor: pointer;
+      background: #f9fafb;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .photo-upload-area:active {
+      border-color: #1a56db;
+      background: #eff6ff;
+    }
+
+    .photo-upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      font-size: 16px;
+    }
+
+    .photo-upload-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a56db;
+      margin-bottom: 2px;
+    }
+
+    .photo-upload-sub {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    .photo-preview-wrap {
+      display: none;
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid #e5e7eb;
+    }
+
+    .photo-preview-wrap.has-photo {
+      display: block;
+    }
+
+    .photo-preview-wrap img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      display: block;
+    }
+
+    @media (min-width: 600px) {
+      .photo-preview-wrap img {
+        height: 90px;
+      }
+    }
+
+    .photo-remove-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.65);
+      color: #ffffff;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .photo-area-wrap {
+      display: block;
+    }
+
+    .photo-area-wrap.hidden {
+      display: none;
+    }
+
+    .field.has-error .photo-upload-area {
+      border-color: #ef4444;
+    }
+
+    /* ============================================================
+       SUBMIT BUTTON
+    ============================================================ */
+    .submit-btn {
+      display: block;
+      width: 100%;
+      padding: 17px;
+      background: linear-gradient(135deg, #1a56db 0%, #1e429f 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      cursor: pointer;
+      font-family: inherit;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: opacity 0.15s, transform 0.1s;
+      position: relative;
+    }
+
+    .submit-btn:active {
+      transform: scale(0.98);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .submit-btn-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+      flex-shrink: 0;
+    }
+
+    .submit-btn.loading .spinner {
+      display: block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ============================================================
+       SUCCESS SCREEN
+    ============================================================ */
+    .success-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      z-index: 8000;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    .success-screen.show {
+      display: block;
+    }
+
+    .success-inner {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .success-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #059669;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+
+    .success-ok {
+      font-size: 26px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: 1px;
+    }
+
+    .success-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #1f2937;
+      margin-bottom: 8px;
+    }
+
+    .success-subtitle {
+      font-size: 15px;
+      color: #6b7280;
+      margin-bottom: 24px;
+    }
+
+    .success-id-box {
+      background: #eff6ff;
+      border: 1.5px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 22px;
+    }
+
+    .success-id-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    .success-id-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: #1a56db;
+      letter-spacing: 0.5px;
+    }
+
+    .success-summary {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .success-summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 5px 0;
+      border-bottom: 1px solid #f0f4f8;
+      font-size: 13px;
+    }
+
+    .success-summary-row:last-child {
+      border-bottom: none;
+    }
+
+    .success-summary-key {
+      color: #6b7280;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .success-summary-val {
+      color: #1f2937;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .success-rush-note {
+      background: #fee2e2;
+      border: 2px solid #ef4444;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 22px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #991b1b;
+      line-height: 1.5;
+      text-align: left;
+      display: none;
+    }
+
+    .success-rush-note.show {
+      display: block;
+    }
+
+    .new-request-btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #1a56db 0%, #1e429f 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      font-family: inherit;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    /* ============================================================
+       TOAST
+    ============================================================ */
+    .toast {
+      position: fixed;
+      bottom: calc(env(safe-area-inset-bottom) + 20px);
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1f2937;
+      color: #ffffff;
+      padding: 12px 22px;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 9000;
+      transition: transform 0.3s ease;
+      white-space: nowrap;
+      max-width: 88vw;
+      text-align: center;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.toast-success { background: #059669; }
+    .toast.toast-error   { background: #ef4444; }
+
+    /* ============================================================
+       MISC
+    ============================================================ */
+    .submit-area {
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+  </style>
 </head>
 <body>
 
-<div class="offline-overlay" id="offlineOverlay">
-    <div class="offline-icon">📵</div>
+  <!-- OFFLINE OVERLAY -->
+  <div class="offline-overlay" id="offlineOverlay">
+    <div class="offline-icon">
+      <div class="offline-icon-x"></div>
+    </div>
     <div class="offline-title">No Internet Connection</div>
-    <div class="offline-message">
-        <span class="offline-dot"></span>
-        You are currently offline.<br><br>
-        Please connect to WiFi or enable
-        mobile data to submit a parts request.
+    <div class="offline-msg">
+      Please connect to Wi-Fi or mobile data to submit a parts request.
+      This form requires an active internet connection.
     </div>
-    <button class="offline-retry-btn" onclick="checkConnection()">
-        🔄 Check Connection
-    </button>
-</div>
+  </div>
 
-<div class="header">
-    <div class="header-logo">🔧</div>
-    <h1>Give and Go Prepared Foods</h1>
-    <p>Maintenance Parts Order Request</p>
-    <div class="online-indicator" id="onlineIndicator">
-        <span class="status-dot" id="statusDot"></span>
-        <span id="statusText">Checking connection...</span>
-    </div>
-</div>
+  <!-- SUCCESS SCREEN -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-inner">
 
-<div class="success-screen" id="successScreen">
-    <div class="success-animation">✅</div>
-    <div class="success-title">Request Submitted!</div>
-    <div class="success-subtitle">The planner has been notified</div>
-    <div class="success-id-box">
-        <div class="success-id-label">Your Request ID</div>
-        <div class="success-id-value" id="successId">PR-2025-0001</div>
-    </div>
-    <div class="success-details">
-        <div class="success-detail-row">
-            <span class="success-detail-label">Submitted by</span>
-            <span class="success-detail-value" id="sName">—</span>
-        </div>
-        <div class="success-detail-row">
-            <span class="success-detail-label">Line</span>
-            <span class="success-detail-value" id="sLine">—</span>
-        </div>
-        <div class="success-detail-row">
-            <span class="success-detail-label">Part</span>
-            <span class="success-detail-value" id="sPart">—</span>
-        </div>
-        <div class="success-detail-row">
-            <span class="success-detail-label">Priority</span>
-            <span class="success-detail-value" id="sPriority">—</span>
-        </div>
-    </div>
-    <div class="success-rush-note" id="rushNote">
-        🚨 RUSH — LINE DOWN: Please also notify
-        your supervisor directly right now!
-    </div>
-    <button class="new-request-btn" onclick="resetForm()">
+      <div class="success-circle">
+        <span class="success-ok">OK</span>
+      </div>
+
+      <div class="success-title">Request Submitted!</div>
+      <div class="success-subtitle">The planner has been notified</div>
+
+      <div class="success-id-box">
+        <div class="success-id-label">Request ID</div>
+        <div class="success-id-value" id="successRequestId">---</div>
+      </div>
+
+      <div class="success-summary" id="successSummary"></div>
+
+      <div class="success-rush-note" id="successRushNote">
+        RUSH - LINE DOWN: Please also notify your supervisor directly right now!
+      </div>
+
+      <button class="new-request-btn" id="newRequestBtn" type="button">
         + Submit Another Request
-    </button>
-</div>
+      </button>
 
-<div class="toast" id="toast"></div>
-
-<div class="container">
-<form id="partsForm" novalidate autocomplete="off">
-
-    <div class="card">
-        <div class="card-title">👤 Requestor Information</div>
-        <div class="field">
-            <label for="requestorName">Requestor Name
-                <span class="required-star">*</span></label>
-            <div class="select-wrapper">
-                <select id="requestorName" name="requestorName">
-                    <option value="">— Select Your Name —</option>
-                    <option>Abrham</option>
-                    <option>Alex</option>
-                    <option>Amar</option>
-                    <option>Bhavin</option>
-                    <option>Carlos</option>
-                    <option>Christopher</option>
-                    <option>Dharam</option>
-                    <option>Dhaval</option>
-                    <option>Dhruvil</option>
-                    <option>Dhruv</option>
-                    <option>Dinesh</option>
-                    <option>Gurnam</option>
-                    <option>Harish</option>
-                    <option>Harshit</option>
-                    <option>Hemant</option>
-                    <option>Ion</option>
-                    <option>Moksh</option>
-                    <option>Noel</option>
-                    <option>Pranav</option>
-                    <option>Scott</option>
-                    <option>Sebastian</option>
-                    <option>Wes</option>
-                </select>
-            </div>
-            <div class="error-msg" id="err-requestorName">
-                ⚠ Please select your name.</div>
-        </div>
-        <div class="field">
-            <label>Shift <span class="required-star">*</span></label>
-            <div class="shift-group">
-                <div class="shift-btn">
-                    <input type="radio" name="shift"
-                           id="shiftDay" value="DAY">
-                    <label for="shiftDay">
-                        <span class="shift-emoji">☀️</span>DAY
-                    </label>
-                </div>
-                <div class="shift-btn">
-                    <input type="radio" name="shift"
-                           id="shiftAfternoon" value="AFTERNOON">
-                    <label for="shiftAfternoon">
-                        <span class="shift-emoji">🌤️</span>AFTERNOON
-                    </label>
-                </div>
-                <div class="shift-btn">
-                    <input type="radio" name="shift"
-                           id="shiftNight" value="NIGHT">
-                    <label for="shiftNight">
-                        <span class="shift-emoji">🌙</span>NIGHT
-                    </label>
-                </div>
-            </div>
-            <div class="error-msg" id="err-shift">
-                ⚠ Please select your shift.</div>
-        </div>
     </div>
+  </div>
 
-    <div class="card">
-        <div class="card-title">🏭 Location & Equipment</div>
-        <div class="field">
-            <label for="productionLine">Production Line
-                <span class="required-star">*</span></label>
-            <div class="select-wrapper">
-                <select id="productionLine" name="productionLine">
-                    <option value="">— Select Production Line —</option>
-                    <option>All Lines</option>
-                    <option>BR01</option>
-                    <option>BR02</option>
-                    <option>BO01</option>
-                    <option>BO02</option>
-                    <option>Party Tray</option>
-                    <option>ILAPAK01</option>
-                    <option>ILAPAK02</option>
-                    <option>FLOW WRAPPER-01</option>
-                    <option>FLOW WRAPPER-02</option>
-                </select>
-            </div>
-            <div class="error-msg" id="err-productionLine">
-                ⚠ Please select the production line.</div>
-        </div>
-        <div class="field">
-            <label for="equipment">Equipment / Machine Name
-                <span class="required-star">*</span></label>
-            <input type="text" id="equipment" name="equipment"
-                   placeholder="e.g. Conveyor Motor, Sealing Unit...">
-            <div class="error-msg" id="err-equipment">
-                ⚠ Please enter the equipment name.</div>
-        </div>
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="connection-indicator" id="connIndicator">
+      <span class="conn-dot" id="connDot"></span>
+      <span class="conn-label" id="connLabel">ONLINE</span>
     </div>
+    <div class="header-company">Give and Go Prepared Foods</div>
+    <div class="header-title">Maintenance Parts Order Request</div>
+  </div>
 
-    <div class="card">
-        <div class="card-title">🚨 Priority Level</div>
-        <div class="field">
-            <label>Select Priority
-                <span class="required-star">*</span></label>
-            <div class="priority-group">
-                <div class="priority-btn">
-                    <input type="radio" name="priority"
-                           id="pRush" value="Rush - Line Down">
-                    <label for="pRush" class="p-rush">
-                        <span class="priority-emoji">🔴</span>
-                        <span class="priority-text">
-                            <strong>Rush — Line Down</strong>
-                            <span>Choose this when part is required
-                            ASAP for a line down situation.</span>
-                        </span>
-                    </label>
-                </div>
-                <div class="priority-btn">
-                    <input type="radio" name="priority"
-                           id="pHigh"
-                           value="High - Needed ASAP / Not Line Down">
-                    <label for="pHigh" class="p-high">
-                        <span class="priority-emoji">🟠</span>
-                        <span class="priority-text">
-                            <strong>High — Needed ASAP / Not Line Down</strong>
-                            <span>Choose when part is required but
-                            line is not down OR not enough parts
-                            to perform the job.</span>
-                        </span>
-                    </label>
-                </div>
-                <div class="priority-btn">
-                    <input type="radio" name="priority"
-                           id="pMedium"
-                           value="Medium - Minimum Qty. on Hand">
-                    <label for="pMedium" class="p-medium">
-                        <span class="priority-emoji">🟡</span>
-                        <span class="priority-text">
-                            <strong>Medium — Minimum Qty. on Hand</strong>
-                            <span>Choose when stock is at or below
-                            minimum quantity threshold.</span>
-                        </span>
-                    </label>
-                </div>
-                <div class="priority-btn">
-                    <input type="radio" name="priority"
-                           id="pLow"
-                           value="Low - Project Requirement Only">
-                    <label for="pLow" class="p-low">
-                        <span class="priority-emoji">🔵</span>
-                        <span class="priority-text">
-                            <strong>Low — Project Requirement Only</strong>
-                            <span>Choose when part is needed for a
-                            project only. No immediate issue.</span>
-                        </span>
-                    </label>
-                </div>
-            </div>
-            <div class="error-msg" id="err-priority">
-                ⚠ Please select a priority level.</div>
-        </div>
-    </div>
+  <!-- MAIN FORM -->
+  <div class="form-wrapper">
+    <form id="partsForm" novalidate autocomplete="off">
 
-    <div class="card">
-        <div class="card-title">🔩 Part Details</div>
-        <div class="field">
-            <label for="partName">Part Name
-                <span class="required-star">*</span></label>
-            <input type="text" id="partName" name="partName"
-                   placeholder="e.g. Bearing, Motor, Belt, Chain...">
-            <div class="error-msg" id="err-partName">
-                ⚠ Please enter the part name.</div>
+      <!-- ======================================================
+           SECTION 1: Requestor Information
+      ====================================================== -->
+      <div class="card">
+        <div class="card-header">
+          <div class="section-title">Section 1 - Requestor Information</div>
         </div>
-        <div class="field">
-            <label for="partNumber">Part Number
-                <span class="required-star">*</span></label>
-            <input type="text" id="partNumber" name="partNumber"
-                   placeholder="e.g. 6205-2RS, SKF-7208...">
-            <div class="hint">📌 Find on part, nameplate, or manual.</div>
-            <div class="error-msg" id="err-partNumber">
-                ⚠ Please enter the part number.</div>
-        </div>
-        <div class="field">
-            <label for="quantity">Quantity Required
-                <span class="required-star">*</span></label>
-            <input type="number" id="quantity" name="quantity"
-                   placeholder="Enter quantity needed"
-                   min="1" inputmode="numeric" pattern="[0-9]*">
-            <div class="error-msg" id="err-quantity">
-                ⚠ Please enter a valid quantity (minimum 1).</div>
-        </div>
-        <div class="field">
-            <label for="workOrder">Associated W.O.#
-                <span style="color:#9ca3af;font-weight:400;">
-                (Optional)</span></label>
-            <input type="text" id="workOrder" name="workOrder"
-                   placeholder="e.g. WO-2025-1234">
-            <div class="hint">📋 Work Order number if applicable.</div>
-        </div>
-        <div class="field">
-            <label for="details">Details
-                <span style="color:#9ca3af;font-weight:400;">
-                (Optional)</span></label>
-            <textarea id="details" name="details"
-                placeholder="Machine model, part location, failure description, brand preference..."></textarea>
-        </div>
-    </div>
+        <div class="card-body">
 
-    <div class="card">
-        <div class="card-title">📷 Photos</div>
-        <p class="hint" style="margin-bottom:16px;font-size:13px;
-           color:#6b7280;line-height:1.5;">
-            Clear photo of part or nameplate helps identify
-            and source the correct part faster.
-        </p>
-        <div class="photo-grid">
-            <div class="photo-item">
-                <div class="photo-label-row">
-                    <label style="margin:0;">Photo 1</label>
-                    <span class="photo-badge required">REQUIRED</span>
-                </div>
-                <div class="photo-drop-zone" id="zone1">
-                    <input type="file" id="photo1" name="photo1"
-                           accept="image/*"
-                           onchange="handlePhoto(this,1)">
-                    <div class="photo-drop-inner" id="inner1">
-                        <div class="photo-placeholder-icon">📷</div>
-                        <div class="photo-placeholder-text">
-                            Tap to capture</div>
-                        <div class="photo-placeholder-sub">
-                            Camera or Gallery</div>
-                    </div>
-                </div>
-                <div class="photo-preview-bar" id="bar1">
-                    <span class="photo-attached-text">
-                        ✅ Photo attached</span>
-                    <button type="button" class="photo-remove-btn"
-                            onclick="removePhoto(1)">Remove</button>
-                </div>
-                <div class="error-msg" id="err-photo1">
-                    ⚠ At least 1 photo is required.</div>
-            </div>
-            <div class="photo-item">
-                <div class="photo-label-row">
-                    <label style="margin:0;">Photo 2</label>
-                    <span class="photo-badge optional">OPTIONAL</span>
-                </div>
-                <div class="photo-drop-zone" id="zone2">
-                    <input type="file" id="photo2" name="photo2"
-                           accept="image/*"
-                           onchange="handlePhoto(this,2)">
-                    <div class="photo-drop-inner" id="inner2">
-                        <div class="photo-placeholder-icon">📷</div>
-                        <div class="photo-placeholder-text">
-                            Tap to capture</div>
-                        <div class="photo-placeholder-sub">
-                            Camera or Gallery</div>
-                    </div>
-                </div>
-                <div class="photo-preview-bar" id="bar2">
-                    <span class="photo-attached-text">
-                        ✅ Photo attached</span>
-                    <button type="button" class="photo-remove-btn"
-                            onclick="removePhoto(2)">Remove</button>
-                </div>
-            </div>
-            <div class="photo-item">
-                <div class="photo-label-row">
-                    <label style="margin:0;">Photo 3</label>
-                    <span class="photo-badge optional">OPTIONAL</span>
-                </div>
-                <div class="photo-drop-zone" id="zone3">
-                    <input type="file" id="photo3" name="photo3"
-                           accept="image/*"
-                           onchange="handlePhoto(this,3)">
-                    <div class="photo-drop-inner" id="inner3">
-                        <div class="photo-placeholder-icon">📷</div>
-                        <div class="photo-placeholder-text">
-                            Tap to capture</div>
-                        <div class="photo-placeholder-sub">
-                            Camera or Gallery</div>
-                    </div>
-                </div>
-                <div class="photo-preview-bar" id="bar3">
-                    <span class="photo-attached-text">
-                        ✅ Photo attached</span>
-                    <button type="button" class="photo-remove-btn"
-                            onclick="removePhoto(3)">Remove</button>
-                </div>
-            </div>
-        </div>
-    </div>
+          <!-- Requestor Name -->
+          <div class="field" id="field-requestorName">
+            <label class="field-label" for="requestorName">
+              Requestor Name <span class="req">*</span>
+            </label>
+            <select class="input" id="requestorName" name="requestorName">
+              <option value="">-- Select Your Name --</option>
+              <option value="Abrham">Abrham</option>
+              <option value="Alex">Alex</option>
+              <option value="Amar">Amar</option>
+              <option value="Bhavin">Bhavin</option>
+              <option value="Carlos">Carlos</option>
+              <option value="Christopher">Christopher</option>
+              <option value="Dharam">Dharam</option>
+              <option value="Dhaval">Dhaval</option>
+              <option value="Dhruvil">Dhruvil</option>
+              <option value="Dhruv">Dhruv</option>
+              <option value="Dinesh">Dinesh</option>
+              <option value="Gurnam">Gurnam</option>
+              <option value="Harish">Harish</option>
+              <option value="Harshit">Harshit</option>
+              <option value="Hemant">Hemant</option>
+              <option value="Ion">Ion</option>
+              <option value="Moksh">Moksh</option>
+              <option value="Noel">Noel</option>
+              <option value="Pranav">Pranav</option>
+              <option value="Scott">Scott</option>
+              <option value="Sebastian">Sebastian</option>
+              <option value="Wes">Wes</option>
+            </select>
+            <div class="field-error" id="err-requestorName">Please select your name.</div>
+          </div>
 
-    <div class="submit-wrapper">
-        <button type="submit" class="submit-btn" id="submitBtn">
-            <span class="submit-text" id="submitText">
-                🚀 SUBMIT PARTS REQUEST</span>
-            <div class="spinner" id="submitSpinner"></div>
+          <!-- Shift -->
+          <div class="field" id="field-shift">
+            <label class="field-label">Shift <span class="req">*</span></label>
+            <div class="shift-row">
+              <div class="shift-btn">
+                <input type="radio" name="shift" id="shift-day" value="Day">
+                <label for="shift-day">DAY</label>
+              </div>
+              <div class="shift-btn">
+                <input type="radio" name="shift" id="shift-afternoon" value="Afternoon">
+                <label for="shift-afternoon">AFTERNOON</label>
+              </div>
+              <div class="shift-btn">
+                <input type="radio" name="shift" id="shift-night" value="Night">
+                <label for="shift-night">NIGHT</label>
+              </div>
+            </div>
+            <div class="field-error" id="err-shift">Please select your shift.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ======================================================
+           SECTION 2: Location and Equipment
+      ====================================================== -->
+      <div class="card">
+        <div class="card-header">
+          <div class="section-title">Section 2 - Location and Equipment</div>
+        </div>
+        <div class="card-body">
+
+          <!-- Production Line -->
+          <div class="field" id="field-productionLine">
+            <label class="field-label" for="productionLine">
+              Production Line <span class="req">*</span>
+            </label>
+            <select class="input" id="productionLine" name="productionLine">
+              <option value="">-- Select Production Line --</option>
+              <option value="All Lines">All Lines</option>
+              <option value="BR01">BR01</option>
+              <option value="BR02">BR02</option>
+              <option value="BO01">BO01</option>
+              <option value="BO02">BO02</option>
+              <option value="Party Tray">Party Tray</option>
+              <option value="ILAPAK01">ILAPAK01</option>
+              <option value="ILAPAK02">ILAPAK02</option>
+              <option value="FLOW WRAPPER-01">FLOW WRAPPER-01</option>
+              <option value="FLOW WRAPPER-02">FLOW WRAPPER-02</option>
+            </select>
+            <div class="field-error" id="err-productionLine">Please select a production line.</div>
+          </div>
+
+          <!-- Equipment -->
+          <div class="field" id="field-equipment">
+            <label class="field-label" for="equipment">
+              Equipment / Machine Name <span class="req">*</span>
+            </label>
+            <input
+              type="text"
+              class="input"
+              id="equipment"
+              name="equipment"
+              placeholder="e.g. Conveyor Motor, Sealing Unit..."
+              inputmode="text"
+            >
+            <div class="field-error" id="err-equipment">Please enter the equipment name.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ======================================================
+           SECTION 3: Priority Level
+      ====================================================== -->
+      <div class="card">
+        <div class="card-header">
+          <div class="section-title">Section 3 - Priority Level</div>
+        </div>
+        <div class="card-body">
+
+          <div class="field" id="field-priority">
+            <label class="field-label">Select Priority <span class="req">*</span></label>
+            <div class="priority-list">
+
+              <div class="priority-card p-rush">
+                <input type="radio" name="priority" id="pri-rush"
+                       value="Rush - Line Down">
+                <label for="pri-rush">
+                  <span class="priority-dot red"></span>
+                  <span class="priority-text">
+                    <span class="priority-title">Rush - Line Down</span>
+                    <span class="priority-desc">
+                      Choose this when part is required ASAP for a line down situation.
+                    </span>
+                  </span>
+                </label>
+              </div>
+
+              <div class="priority-card p-high">
+                <input type="radio" name="priority" id="pri-high"
+                       value="High - Needed ASAP / Not Line Down">
+                <label for="pri-high">
+                  <span class="priority-dot orange"></span>
+                  <span class="priority-text">
+                    <span class="priority-title">High - Needed ASAP / Not Line Down</span>
+                    <span class="priority-desc">
+                      Choose when part is required but line is not down OR not enough parts to perform the job.
+                    </span>
+                  </span>
+                </label>
+              </div>
+
+              <div class="priority-card p-medium">
+                <input type="radio" name="priority" id="pri-medium"
+                       value="Medium - Minimum Qty. on Hand">
+                <label for="pri-medium">
+                  <span class="priority-dot yellow"></span>
+                  <span class="priority-text">
+                    <span class="priority-title">Medium - Minimum Qty. on Hand</span>
+                    <span class="priority-desc">
+                      Choose when stock is at or below minimum quantity threshold.
+                    </span>
+                  </span>
+                </label>
+              </div>
+
+              <div class="priority-card p-low">
+                <input type="radio" name="priority" id="pri-low"
+                       value="Low - Project Requirement Only">
+                <label for="pri-low">
+                  <span class="priority-dot blue"></span>
+                  <span class="priority-text">
+                    <span class="priority-title">Low - Project Requirement Only</span>
+                    <span class="priority-desc">
+                      Choose when part is needed for a project only. No immediate issue.
+                    </span>
+                  </span>
+                </label>
+              </div>
+
+            </div>
+            <div class="field-error" id="err-priority">Please select a priority level.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ======================================================
+           SECTION 4: Part Details
+      ====================================================== -->
+      <div class="card">
+        <div class="card-header">
+          <div class="section-title">Section 4 - Part Details</div>
+        </div>
+        <div class="card-body">
+
+          <!-- Part Name -->
+          <div class="field" id="field-partName">
+            <label class="field-label" for="partName">
+              Part Name <span class="req">*</span>
+            </label>
+            <input
+              type="text"
+              class="input"
+              id="partName"
+              name="partName"
+              placeholder="e.g. Bearing, Motor, Belt, Chain..."
+              inputmode="text"
+            >
+            <div class="field-error" id="err-partName">Please enter the part name.</div>
+          </div>
+
+          <!-- Part Number -->
+          <div class="field" id="field-partNumber">
+            <label class="field-label" for="partNumber">
+              Part Number <span class="req">*</span>
+            </label>
+            <input
+              type="text"
+              class="input"
+              id="partNumber"
+              name="partNumber"
+              placeholder="e.g. 6205-2RS, SKF-7208..."
+              inputmode="text"
+            >
+            <div class="field-hint">Find on part, nameplate, or manual.</div>
+            <div class="field-error" id="err-partNumber">Please enter the part number.</div>
+          </div>
+
+          <!-- Quantity -->
+          <div class="field" id="field-quantity">
+            <label class="field-label" for="quantity">
+              Quantity Required <span class="req">*</span>
+            </label>
+            <input
+              type="number"
+              class="input"
+              id="quantity"
+              name="quantity"
+              placeholder="Enter quantity needed"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              min="1"
+            >
+            <div class="field-error" id="err-quantity">Please enter a valid quantity (minimum 1).</div>
+          </div>
+
+          <!-- Work Order -->
+          <div class="field" id="field-workOrder">
+            <label class="field-label" for="workOrder">
+              Associated W.O.#
+            </label>
+            <input
+              type="text"
+              class="input"
+              id="workOrder"
+              name="workOrder"
+              placeholder="e.g. WO-2025-1234"
+              inputmode="text"
+            >
+            <div class="field-hint">Work Order number if applicable.</div>
+          </div>
+
+          <!-- Details -->
+          <div class="field" id="field-details">
+            <label class="field-label" for="details">
+              Details
+            </label>
+            <textarea
+              class="input"
+              id="details"
+              name="details"
+              placeholder="Machine model, part location, failure description, brand preference..."
+            ></textarea>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ======================================================
+           SECTION 5: Photos
+      ====================================================== -->
+      <div class="card">
+        <div class="card-header">
+          <div class="section-title">Section 5 - Photos</div>
+        </div>
+        <div class="card-body">
+
+          <div class="photo-hint">
+            Clear photo of part or nameplate helps identify and source the correct part faster.
+          </div>
+
+          <div class="field" id="field-photo1">
+            <div class="photo-grid">
+
+              <!-- Photo 1 -->
+              <div class="photo-item">
+                <div class="photo-item-header">
+                  <span class="photo-item-label">Photo 1</span>
+                  <span class="badge badge-required">REQUIRED</span>
+                </div>
+                <div class="photo-area-wrap" id="photoArea1">
+                  <div class="photo-upload-area">
+                    <input
+                      type="file"
+                      id="photoInput1"
+                      accept="image/*"
+                    >
+                    <div class="photo-upload-text">Tap to capture</div>
+                    <div class="photo-upload-sub">Camera or Gallery</div>
+                  </div>
+                </div>
+                <div class="photo-preview-wrap" id="photoPreview1">
+                  <img id="photoImg1" src="" alt="Photo 1 preview">
+                  <button
+                    type="button"
+                    class="photo-remove-btn"
+                    id="photoRemove1"
+                    aria-label="Remove photo 1"
+                  >X</button>
+                </div>
+                <div class="field-error" id="err-photo1">At least 1 photo is required.</div>
+              </div>
+
+              <!-- Photo 2 -->
+              <div class="photo-item">
+                <div class="photo-item-header">
+                  <span class="photo-item-label">Photo 2</span>
+                  <span class="badge badge-optional">OPTIONAL</span>
+                </div>
+                <div class="photo-area-wrap" id="photoArea2">
+                  <div class="photo-upload-area">
+                    <input
+                      type="file"
+                      id="photoInput2"
+                      accept="image/*"
+                    >
+                    <div class="photo-upload-text">Tap to capture</div>
+                    <div class="photo-upload-sub">Camera or Gallery</div>
+                  </div>
+                </div>
+                <div class="photo-preview-wrap" id="photoPreview2">
+                  <img id="photoImg2" src="" alt="Photo 2 preview">
+                  <button
+                    type="button"
+                    class="photo-remove-btn"
+                    id="photoRemove2"
+                    aria-label="Remove photo 2"
+                  >X</button>
+                </div>
+              </div>
+
+              <!-- Photo 3 -->
+              <div class="photo-item">
+                <div class="photo-item-header">
+                  <span class="photo-item-label">Photo 3</span>
+                  <span class="badge badge-optional">OPTIONAL</span>
+                </div>
+                <div class="photo-area-wrap" id="photoArea3">
+                  <div class="photo-upload-area">
+                    <input
+                      type="file"
+                      id="photoInput3"
+                      accept="image/*"
+                    >
+                    <div class="photo-upload-text">Tap to capture</div>
+                    <div class="photo-upload-sub">Camera or Gallery</div>
+                  </div>
+                </div>
+                <div class="photo-preview-wrap" id="photoPreview3">
+                  <img id="photoImg3" src="" alt="Photo 3 preview">
+                  <button
+                    type="button"
+                    class="photo-remove-btn"
+                    id="photoRemove3"
+                    aria-label="Remove photo 3"
+                  >X</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <div class="submit-area">
+        <button
+          type="submit"
+          class="submit-btn"
+          id="submitBtn"
+        >
+          <span class="submit-btn-inner">
+            <span class="spinner" id="submitSpinner"></span>
+            <span id="submitBtnText">SUBMIT PARTS REQUEST</span>
+          </span>
         </button>
-    </div>
+      </div>
 
-</form>
-</div>
+    </form>
+  </div>
 
-<script>
-'use strict';
+  <script>
+    /* ==========================================================
+       CONFIG
+    ========================================================== */
+    var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwCLaO7Ji5c-16AfOXOwC6pyCi93U0Vur-_Ng8a6r2vyQPHIwbPj-_4PziBciPAE5kx/exec';
 
-// ✅ YOUR WEB APP URL
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwkPwit2eE6lNq4jfjZCZma5MptzbqiHpmTG1at7LFt8sOKZj25NdLbYIifniY7xXHK/exec";
+    /* ==========================================================
+       PHOTO STATE
+    ========================================================== */
+    var photos = { 1: '', 2: '', 3: '' };
 
-const photos = {1:null,2:null,3:null};
+    /* ==========================================================
+       ASCII CLEAN UTILITY
+       Strips all non-ASCII and replaces common unicode chars
+    ========================================================== */
+    function toAscii(val) {
+      if (val === null || val === undefined) return '';
+      var s = String(val);
+      s = s.replace(/[\u2018\u2019]/g, "'");
+      s = s.replace(/[\u201C\u201D]/g, '"');
+      s = s.replace(/[\u2013\u2014]/g, '-');
+      s = s.replace(/\u2026/g, '...');
+      s = s.replace(/\u00A0/g, ' ');
+      s = s.replace(/[^\x20-\x7E]/g, '');
+      return s.trim();
+    }
 
-function isOnline(){return navigator.onLine;}
+    /* ==========================================================
+       CONNECTION STATUS
+    ========================================================== */
+    function updateConnectionStatus() {
+      var online = navigator.onLine;
+      var dot    = document.getElementById('connDot');
+      var label  = document.getElementById('connLabel');
+      var overlay = document.getElementById('offlineOverlay');
 
-function updateConnectionUI(){
-    var overlay=document.getElementById('offlineOverlay');
-    var dot=document.getElementById('statusDot');
-    var text=document.getElementById('statusText');
-    var btn=document.getElementById('submitBtn');
-    if(isOnline()){
-        overlay.classList.remove('show');
+      if (online) {
         dot.classList.remove('offline');
-        text.textContent='Online — Ready to submit';
-        btn.disabled=false;
-    }else{
-        overlay.classList.add('show');
+        label.textContent = 'ONLINE';
+        overlay.classList.remove('show');
+      } else {
         dot.classList.add('offline');
-        text.textContent='Offline — No connection';
-        btn.disabled=true;
+        label.textContent = 'OFFLINE';
+        overlay.classList.add('show');
+      }
     }
-}
 
-function checkConnection(){
-    updateConnectionUI();
-    if(isOnline())showToast('✅ Connected!','success');
-}
+    window.addEventListener('online',  updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+    updateConnectionStatus();
 
-window.addEventListener('online',updateConnectionUI);
-window.addEventListener('offline',updateConnectionUI);
+    /* ==========================================================
+       IMAGE COMPRESSION
+    ========================================================== */
+    function compressImage(file, callback) {
+      var maxSize = 15 * 1024 * 1024;
+      if (file.size > maxSize) {
+        showToast('File is too large. Max size is 15MB.', 'error');
+        callback(null);
+        return;
+      }
 
-function handlePhoto(input,num){
-    if(!input.files||!input.files[0])return;
-    var file=input.files[0];
-    if(file.size>15*1024*1024){
-        showToast('⚠ Photo too large.','error');
-        input.value='';return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var maxW   = 900;
+          var w      = img.width;
+          var h      = img.height;
+
+          if (w > maxW) {
+            h = Math.round(h * maxW / w);
+            w = maxW;
+          }
+
+          var canvas = document.createElement('canvas');
+          canvas.width  = w;
+          canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+
+          var compressed = canvas.toDataURL('image/jpeg', 0.75);
+          callback(compressed);
+        };
+        img.onerror = function() {
+          showToast('Could not read image file.', 'error');
+          callback(null);
+        };
+        img.src = e.target.result;
+      };
+      reader.onerror = function() {
+        showToast('Could not read file.', 'error');
+        callback(null);
+      };
+      reader.readAsDataURL(file);
     }
-    var reader=new FileReader();
-    reader.onload=function(e){
-        compressImage(e.target.result,function(c){
-            photos[num]=c;
-            showPhotoPreview(num,c);
-            if(num===1){
-                document.getElementById('zone1')
-                    .classList.remove('error-border');
-                document.getElementById('err-photo1')
-                    .classList.remove('show');
-            }
+
+    /* ==========================================================
+       PHOTO SETUP
+    ========================================================== */
+    function setupPhoto(num) {
+      var input   = document.getElementById('photoInput'   + num);
+      var preview = document.getElementById('photoPreview' + num);
+      var img     = document.getElementById('photoImg'     + num);
+      var area    = document.getElementById('photoArea'    + num);
+      var remove  = document.getElementById('photoRemove'  + num);
+
+      if (!input) return;
+
+      input.addEventListener('change', function(e) {
+        var file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        compressImage(file, function(result) {
+          if (!result) {
+            /* iOS Safari workaround - reset input */
+            try { input.value = ''; } catch(ex) {}
+            var wrap = input.parentNode;
+            var clone = input.cloneNode(true);
+            wrap.replaceChild(clone, input);
+            setupPhotoInput(num, clone, preview, img, area, remove);
+            return;
+          }
+          photos[num] = result;
+          img.src = result;
+          preview.classList.add('has-photo');
+          area.classList.add('hidden');
+
+          if (num === 1) {
+            clearFieldError('field-photo1');
+          }
         });
-    };
-    reader.onerror=function(){
-        showToast('⚠ Could not read photo.','error');
-    };
-    reader.readAsDataURL(file);
-}
 
-function showPhotoPreview(num,src){
-    var zone=document.getElementById('zone'+num);
-    var inner=document.getElementById('inner'+num);
-    var bar=document.getElementById('bar'+num);
-    var img=zone.querySelector('.photo-preview-img');
-    if(!img){
-        img=document.createElement('img');
-        img.className='photo-preview-img';
-        img.alt='Photo '+num;
-        zone.insertBefore(img,zone.querySelector('input'));
+        /* iOS Safari workaround - reset input value */
+        try { input.value = ''; } catch(ex) {}
+      });
+
+      if (remove) {
+        remove.addEventListener('click', function() {
+          photos[num] = '';
+          img.src = '';
+          preview.classList.remove('has-photo');
+          area.classList.remove('hidden');
+
+          /* iOS Safari - replace input node to allow re-selection */
+          var wrap  = input.parentNode;
+          var clone = input.cloneNode(true);
+          wrap.replaceChild(clone, input);
+          setupPhotoInput(num, clone, preview, img, area, remove);
+        });
+      }
     }
-    img.src=src;img.style.display='block';
-    inner.style.display='none';
-    zone.classList.add('has-photo');
-    bar.classList.add('show');
-}
 
-function removePhoto(num){
-    photos[num]=null;
-    var input=document.getElementById('photo'+num);
-    var zone=document.getElementById('zone'+num);
-    var inner=document.getElementById('inner'+num);
-    var bar=document.getElementById('bar'+num);
-    var img=zone.querySelector('.photo-preview-img');
-    try{input.value='';
-        if(input.value){input.type='text';input.type='file';}}
-    catch(e){}
-    if(img)img.style.display='none';
-    inner.style.display='';
-    zone.classList.remove('has-photo');
-    bar.classList.remove('show');
-}
+    function setupPhotoInput(num, input, preview, img, area, remove) {
+      input.addEventListener('change', function(e) {
+        var file = e.target.files && e.target.files[0];
+        if (!file) return;
 
-function compressImage(b64,cb){
-    var img=new Image();
-    img.onload=function(){
-        var MAX=900,w=img.width,h=img.height;
-        if(w>MAX||h>MAX){
-            if(w>h){h=Math.round(h/w*MAX);w=MAX;}
-            else{w=Math.round(w/h*MAX);h=MAX;}
+        compressImage(file, function(result) {
+          if (!result) return;
+          photos[num] = result;
+          img.src = result;
+          preview.classList.add('has-photo');
+          area.classList.add('hidden');
+
+          if (num === 1) {
+            clearFieldError('field-photo1');
+          }
+        });
+
+        try { input.value = ''; } catch(ex) {}
+      });
+    }
+
+    setupPhoto(1);
+    setupPhoto(2);
+    setupPhoto(3);
+
+    /* ==========================================================
+       FIELD ERROR HELPERS
+    ========================================================== */
+    function showFieldError(fieldId) {
+      var el = document.getElementById(fieldId);
+      if (el) el.classList.add('has-error');
+    }
+
+    function clearFieldError(fieldId) {
+      var el = document.getElementById(fieldId);
+      if (el) el.classList.remove('has-error');
+    }
+
+    /* Clear error on interaction */
+    function attachClearError(elId, fieldId) {
+      var el = document.getElementById(elId);
+      if (!el) return;
+      el.addEventListener('change', function() { clearFieldError(fieldId); });
+      el.addEventListener('input',  function() { clearFieldError(fieldId); });
+    }
+
+    attachClearError('requestorName',  'field-requestorName');
+    attachClearError('productionLine', 'field-productionLine');
+    attachClearError('equipment',      'field-equipment');
+    attachClearError('partName',       'field-partName');
+    attachClearError('partNumber',     'field-partNumber');
+    attachClearError('quantity',       'field-quantity');
+
+    /* Shift radios */
+    document.querySelectorAll('input[name="shift"]').forEach(function(r) {
+      r.addEventListener('change', function() { clearFieldError('field-shift'); });
+    });
+
+    /* Priority radios */
+    document.querySelectorAll('input[name="priority"]').forEach(function(r) {
+      r.addEventListener('change', function() { clearFieldError('field-priority'); });
+    });
+
+    /* ==========================================================
+       VALIDATION
+    ========================================================== */
+    function validateForm() {
+      var ok = true;
+
+      function req(fieldId, val) {
+        if (!val || !String(val).trim()) {
+          showFieldError(fieldId);
+          ok = false;
+          return false;
         }
-        var c=document.createElement('canvas');
-        c.width=w;c.height=h;
-        c.getContext('2d').drawImage(img,0,0,w,h);
-        cb(c.toDataURL('image/jpeg',0.75));
-    };
-    img.onerror=function(){cb(b64);};
-    img.src=b64;
-}
+        clearFieldError(fieldId);
+        return true;
+      }
 
-function validateForm(){
-    var valid=true,firstErr=null;
-    function check(id,errId,bad){
-        var el=document.getElementById(id);
-        var err=document.getElementById(errId);
-        if(!err)return;
-        if(bad){el&&el.classList.add('error');
-            err.classList.add('show');
-            if(!firstErr)firstErr=err;valid=false;}
-        else{el&&el.classList.remove('error');
-            err.classList.remove('show');}
+      req('field-requestorName',  document.getElementById('requestorName').value);
+      req('field-productionLine', document.getElementById('productionLine').value);
+      req('field-equipment',      document.getElementById('equipment').value);
+      req('field-partName',       document.getElementById('partName').value);
+      req('field-partNumber',     document.getElementById('partNumber').value);
+
+      /* Shift */
+      var shiftVal = '';
+      document.querySelectorAll('input[name="shift"]').forEach(function(r) {
+        if (r.checked) shiftVal = r.value;
+      });
+      if (!shiftVal) {
+        showFieldError('field-shift');
+        ok = false;
+      } else {
+        clearFieldError('field-shift');
+      }
+
+      /* Priority */
+      var priVal = '';
+      document.querySelectorAll('input[name="priority"]').forEach(function(r) {
+        if (r.checked) priVal = r.value;
+      });
+      if (!priVal) {
+        showFieldError('field-priority');
+        ok = false;
+      } else {
+        clearFieldError('field-priority');
+      }
+
+      /* Quantity */
+      var qtyEl  = document.getElementById('quantity');
+      var qtyVal = parseInt(qtyEl.value, 10);
+      if (!qtyEl.value || isNaN(qtyVal) || qtyVal < 1) {
+        showFieldError('field-quantity');
+        ok = false;
+      } else {
+        clearFieldError('field-quantity');
+      }
+
+      /* Photo 1 required */
+      if (!photos[1]) {
+        showFieldError('field-photo1');
+        ok = false;
+      } else {
+        clearFieldError('field-photo1');
+      }
+
+      return ok;
     }
-    check('requestorName','err-requestorName',
-        !document.getElementById('requestorName').value);
-    check('productionLine','err-productionLine',
-        !document.getElementById('productionLine').value);
-    check('equipment','err-equipment',
-        !document.getElementById('equipment').value.trim());
-    check('partName','err-partName',
-        !document.getElementById('partName').value.trim());
-    check('partNumber','err-partNumber',
-        !document.getElementById('partNumber').value.trim());
-    var qty=parseInt(document.getElementById('quantity').value);
-    check('quantity','err-quantity',isNaN(qty)||qty<1);
-    var shiftOk=!!document.querySelector('input[name="shift"]:checked');
-    var shiftErr=document.getElementById('err-shift');
-    if(!shiftOk){shiftErr.classList.add('show');
-        if(!firstErr)firstErr=shiftErr;valid=false;}
-    else{shiftErr.classList.remove('show');}
-    var prioOk=!!document.querySelector('input[name="priority"]:checked');
-    var prioErr=document.getElementById('err-priority');
-    if(!prioOk){prioErr.classList.add('show');
-        if(!firstErr)firstErr=prioErr;valid=false;}
-    else{prioErr.classList.remove('show');}
-    if(!photos[1]){
-        document.getElementById('zone1').classList.add('error-border');
-        document.getElementById('err-photo1').classList.add('show');
-        if(!firstErr)firstErr=document.getElementById('err-photo1');
-        valid=false;}
-    else{
-        document.getElementById('zone1').classList.remove('error-border');
-        document.getElementById('err-photo1').classList.remove('show');}
-    if(firstErr)setTimeout(function(){
-        firstErr.scrollIntoView({behavior:'smooth',block:'center'});
-    },100);
-    return valid;
-}
 
-function collectFormData(){
-    return{
-        timestamp:new Date().toISOString(),
-        requestorName:document.getElementById('requestorName').value,
-        shift:(document.querySelector('input[name="shift"]:checked')||{}).value||'',
-        productionLine:document.getElementById('productionLine').value,
-        equipment:document.getElementById('equipment').value.trim(),
-        priority:(document.querySelector('input[name="priority"]:checked')||{}).value||'',
-        partName:document.getElementById('partName').value.trim(),
-        partNumber:document.getElementById('partNumber').value.trim(),
-        quantity:document.getElementById('quantity').value,
-        workOrder:document.getElementById('workOrder').value.trim(),
-        details:document.getElementById('details').value.trim(),
-        photo1:photos[1]||'',
-        photo2:photos[2]||'',
-        photo3:photos[3]||''
-    };
-}
+    /* ==========================================================
+       COLLECT FORM DATA
+    ========================================================== */
+    function collectFormData() {
+      var shiftVal = '';
+      document.querySelectorAll('input[name="shift"]').forEach(function(r) {
+        if (r.checked) shiftVal = r.value;
+      });
 
-document.getElementById('partsForm').addEventListener('submit',function(e){
-    e.preventDefault();
-    if(!isOnline()){
-        showToast('📵 No internet. Connect and try again.','error');
-        updateConnectionUI();return;
+      var priVal = '';
+      document.querySelectorAll('input[name="priority"]').forEach(function(r) {
+        if (r.checked) priVal = r.value;
+      });
+
+      return {
+        timestamp:      new Date().toISOString(),
+        requestorName:  toAscii(document.getElementById('requestorName').value),
+        shift:          toAscii(shiftVal),
+        productionLine: toAscii(document.getElementById('productionLine').value),
+        equipment:      toAscii(document.getElementById('equipment').value),
+        priority:       toAscii(priVal),
+        partName:       toAscii(document.getElementById('partName').value),
+        partNumber:     toAscii(document.getElementById('partNumber').value),
+        quantity:       document.getElementById('quantity').value,
+        workOrder:      toAscii(document.getElementById('workOrder').value),
+        details:        toAscii(document.getElementById('details').value),
+        photo1:         photos[1] || '',
+        photo2:         photos[2] || '',
+        photo3:         photos[3] || ''
+      };
     }
-    if(!validateForm())return;
-    setLoading(true);
-    var data=collectFormData();
-    fetch(WEB_APP_URL,{
-        method:'POST',
-        body:JSON.stringify(data),
-        headers:{'Content-Type':'text/plain'}
-    })
-    .then(function(res){
-        if(!res.ok)throw new Error('Server error: '+res.status);
-        return res.json();
-    })
-    .then(function(result){
-        if(result.status==='success'){
-            setLoading(false);
-            showSuccess(result.requestId,data);
-        }else{throw new Error(result.message||'Submission failed');}
-    })
-    .catch(function(err){
-        setLoading(false);
-        console.error(err);
-        showToast('❌ Submission failed. Check connection and try again.','error');
+
+    /* ==========================================================
+       TOAST
+    ========================================================== */
+    var toastTimer = null;
+
+    function showToast(msg, type) {
+      var el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className   = 'toast toast-' + (type || 'success');
+      void el.offsetWidth;
+      el.classList.add('show');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function() {
+        el.classList.remove('show');
+      }, 4000);
+    }
+
+    /* ==========================================================
+       SUCCESS SCREEN
+    ========================================================== */
+    function showSuccessScreen(result, data) {
+      document.getElementById('successRequestId').textContent =
+        (result && result.requestId) ? result.requestId : 'N/A';
+
+      var summaryEl = document.getElementById('successSummary');
+      summaryEl.innerHTML = '';
+
+      var rows = [
+        ['Submitted by', data.requestorName],
+        ['Shift',        data.shift],
+        ['Line',         data.productionLine],
+        ['Part',         data.partName],
+        ['Priority',     data.priority]
+      ];
+
+      rows.forEach(function(row) {
+        var div = document.createElement('div');
+        div.className = 'success-summary-row';
+        var key = document.createElement('span');
+        key.className = 'success-summary-key';
+        key.textContent = row[0];
+        var val = document.createElement('span');
+        val.className = 'success-summary-val';
+        val.textContent = row[1];
+        div.appendChild(key);
+        div.appendChild(val);
+        summaryEl.appendChild(div);
+      });
+
+      var rushNote = document.getElementById('successRushNote');
+      if (data.priority && data.priority.indexOf('Rush') !== -1) {
+        rushNote.classList.add('show');
+      } else {
+        rushNote.classList.remove('show');
+      }
+
+      document.getElementById('successScreen').classList.add('show');
+      window.scrollTo(0, 0);
+    }
+
+    /* ==========================================================
+       RESET FORM
+    ========================================================== */
+    function resetForm() {
+      document.getElementById('partsForm').reset();
+
+      photos[1] = '';
+      photos[2] = '';
+      photos[3] = '';
+
+      [1, 2, 3].forEach(function(num) {
+        var preview = document.getElementById('photoPreview' + num);
+        var img     = document.getElementById('photoImg'     + num);
+        var area    = document.getElementById('photoArea'    + num);
+        if (preview) preview.classList.remove('has-photo');
+        if (img)     img.src = '';
+        if (area)    area.classList.remove('hidden');
+
+        /* iOS Safari - replace file inputs */
+        var input = document.getElementById('photoInput' + num);
+        if (input) {
+          var wrap  = input.parentNode;
+          var clone = input.cloneNode(true);
+          wrap.replaceChild(clone, input);
+          setupPhoto(num);
+        }
+      });
+
+      var allFields = document.querySelectorAll('.field.has-error');
+      allFields.forEach(function(f) { f.classList.remove('has-error'); });
+    }
+
+    /* ==========================================================
+       NEW REQUEST BUTTON
+    ========================================================== */
+    document.getElementById('newRequestBtn').addEventListener('click', function() {
+      document.getElementById('successScreen').classList.remove('show');
+      resetForm();
+      window.scrollTo(0, 0);
     });
-});
 
-function setLoading(loading){
-    var btn=document.getElementById('submitBtn');
-    var text=document.getElementById('submitText');
-    var spinner=document.getElementById('submitSpinner');
-    btn.disabled=loading;
-    loading?(text.classList.add('hide'),spinner.classList.add('show'))
-           :(text.classList.remove('hide'),spinner.classList.remove('show'));
-}
+    /* ==========================================================
+       SUBMIT BUTTON STATE
+    ========================================================== */
+    function setSubmitting(on) {
+      var btn     = document.getElementById('submitBtn');
+      var spinner = document.getElementById('submitSpinner');
+      var text    = document.getElementById('submitBtnText');
 
-function showSuccess(requestId,data){
-    document.getElementById('successId').textContent=requestId;
-    document.getElementById('sName').textContent=data.requestorName;
-    document.getElementById('sLine').textContent=data.productionLine;
-    document.getElementById('sPart').textContent=data.partName;
-    document.getElementById('sPriority').textContent=
-        data.priority.split(' - ')[0]||data.priority;
-    var isRush=data.priority.indexOf('Rush')!==-1;
-    document.getElementById('rushNote').classList.toggle('show',isRush);
-    document.getElementById('successScreen').classList.add('show');
-    window.scrollTo({top:0,behavior:'smooth'});
-}
+      if (on) {
+        btn.disabled     = true;
+        btn.classList.add('loading');
+        spinner.style.display = 'block';
+        text.textContent = 'SUBMITTING...';
+      } else {
+        btn.disabled     = false;
+        btn.classList.remove('loading');
+        spinner.style.display = 'none';
+        text.textContent = 'SUBMIT PARTS REQUEST';
+      }
+    }
 
-function resetForm(){
-    document.getElementById('successScreen').classList.remove('show');
-    document.getElementById('partsForm').reset();
-    photos[1]=photos[2]=photos[3]=null;
-    [1,2,3].forEach(removePhoto);
-    document.querySelectorAll('.error-msg').forEach(function(el){
-        el.classList.remove('show');});
-    document.querySelectorAll('.error,.error-border').forEach(function(el){
-        el.classList.remove('error','error-border');});
-    setLoading(false);
-    window.scrollTo({top:0,behavior:'smooth'});
-}
+    /* ==========================================================
+       FORM SUBMIT
+    ========================================================== */
+    document.getElementById('partsForm').addEventListener('submit', function(e) {
+      e.preventDefault();
 
-var toastTimer=null;
-function showToast(msg,type){
-    var t=document.getElementById('toast');
-    t.textContent=msg;t.className='toast show '+(type||'');
-    if(toastTimer)clearTimeout(toastTimer);
-    toastTimer=setTimeout(function(){t.classList.remove('show');},4000);
-}
+      /* Double check online */
+      if (!navigator.onLine) {
+        document.getElementById('offlineOverlay').classList.add('show');
+        return;
+      }
 
-document.querySelectorAll('input,select,textarea').forEach(function(el){
-    ['input','change'].forEach(function(evt){
-        el.addEventListener(evt,function(){
-            this.classList.remove('error');
-            var err=document.getElementById('err-'+this.id);
-            if(err)err.classList.remove('show');
-        });
+      if (!validateForm()) {
+        var firstErr = document.querySelector('.field.has-error');
+        if (firstErr) {
+          firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+
+      var data = collectFormData();
+      setSubmitting(true);
+
+      fetch(WEB_APP_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body:    JSON.stringify(data)
+      })
+      .then(function(response) {
+        return response.text();
+      })
+      .then(function(text) {
+        var result;
+        try {
+          result = JSON.parse(text);
+        } catch(ex) {
+          result = { status: 'error', message: 'Invalid server response.' };
+        }
+
+        setSubmitting(false);
+
+        if (result.status === 'success') {
+          showSuccessScreen(result, data);
+        } else {
+          showToast(
+            'Error: ' + (result.message || 'Submission failed. Please try again.'),
+            'error'
+          );
+        }
+      })
+      .catch(function(err) {
+        setSubmitting(false);
+        showToast('Network error. Please check your connection and try again.', 'error');
+      });
     });
-});
-
-window.addEventListener('load',updateConnectionUI);
-</script>
+  </script>
 </body>
 </html>
